@@ -4,7 +4,7 @@ Find out the *real* star count of JS repositories
 Currently it is just a dump of my hacky scripts I wrote over the weekend.
 Use at your own risk.
 
-[**Demo result**](https://sunakujira1.github.io/real-stars/)
+[**Demo result**](https://sunakujira1.github.io/real-stars/) generated on April 15, 2018
 
 ## Background
 GitHub stars is great to find out how famous/used the library is, but it only scratches the surface.
