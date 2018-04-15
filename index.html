@@ -8,62 +8,131 @@
   <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
   <script src="https://unpkg.com/react-table@latest/react-table.min.js"></script>
-  <link rel="stylesheet" href="node_modules/react-table/react-table.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.2/gh-fork-ribbon.min.css"></link>
+  <link rel="stylesheet" href="https://unpkg.com/react-table@latest/react-table.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.2/gh-fork-ribbon.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background: rgba(73,155,234,1);
+      background: -moz-linear-gradient(left, rgba(73,155,234,1) 0%, rgba(72,156,234,1) 0%, rgba(5,102,141,1) 100%);
+      background: -webkit-gradient(left top, right top, color-stop(0%, rgba(73,155,234,1)), color-stop(0%, rgba(72,156,234,1)), color-stop(100%, rgba(5,102,141,1)));
+      background: -webkit-linear-gradient(left, rgba(73,155,234,1) 0%, rgba(72,156,234,1) 0%, rgba(5,102,141,1) 100%);
+      background: -o-linear-gradient(left, rgba(73,155,234,1) 0%, rgba(72,156,234,1) 0%, rgba(5,102,141,1) 100%);
+      background: -ms-linear-gradient(left, rgba(73,155,234,1) 0%, rgba(72,156,234,1) 0%, rgba(5,102,141,1) 100%);
+      background: linear-gradient(to right, rgba(73,155,234,1) 0%, rgba(72,156,234,1) 0%, rgba(5,102,141,1) 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#499bea', endColorstr='#05668d', GradientType=1);
+    }
+
+    #main-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #main-container > div.ReactTable {
+      width: 1000px;
+      max-width: 90vw;
+      background-color: white;
+      border-radius: 5px;
+      max-height: 80vh;
+    }
+
+    #main-container > div.ReactTable .rt-th {
+      padding: 10px 0;
+    }
+
+    #main-container > div.ReactTable .rt-td {
+      padding: 10px 5px;
+    }
+  </style>
 </head>
 
 <body>
   <a class="github-fork-ribbon" href="https://github.com/Sunakujira1/real-stars" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
   <div id="root"></div>
   <script type="text/babel">
+    const ReactTable = window.ReactTable.default
 
-    class App extends Rect.Component {
-      constructor() {
-
+    class RealStars extends React.Component {
+      constructor(props) {
+        super(props);
         this.state = {
           data: [],
           loading: true,
+          error: null,
         };
       }
 
       componentWillMount() {
-        fetch('./result.json')
+        fetch('result.json')
           .then(res => res.json())
-          .then(data => this.setState({ data, loading: false }));
+          .then(data => this.setState({ data, loading: false }))
+          .catch(err => this.setState({ error: err.message, loading: false }));
       }
 
       render() {
         const columns = [{
+          Header: '#',
+          accessor: 'number',
+          minWidth: 50,
+          style: {
+            textAlign: 'center'
+          }
+        }, {
           Header: 'Name',
-          accessor: 'name' // String-based value accessors!
+          accessor: 'name',
+          minWidth: 300,
         }, {
+          id: 'stars',
           Header: 'Stars',
-          accessor: 'stars'
+          accessor: 'stars',
+          Cell: row => (<div>{row.value.toLocaleString()}</div>),
+          width: 150,
         }, {
-          id: 'top1000', // Required because our accessor is not a string
+          id: 'top1000',
           Header: 'In Top 1000',
           accessor: 'inList',
+          Cell: row => (<div>{row.value ? 'Yes' : 'No'}</div>),
         }, {
-          id: 'link', // Required because our accessor is not a string
+          id: 'link',
           Header: 'Link',
-          Cell: props => props.inList ? <a className='link' href={props.url}>Link</a> : null
+          accessor: 'url',
+          Cell: row => row.original.inList ? <a className='link' href={row.value} target="_blank">Link</a> : null
+        }, {
+          id: 'owner',
+          Header: 'Owner',
+          accessor: 'owner',
+          Cell: row => row.original.inList ? <div>{row.value}</div> : null
         }]
 
-        <ReactTable
-          data={this.state.data}
-          columns={columns}
-          loading={this.state.loading}
-          defaultSorted={[{ id: 'stars', desc: true }]}
-        />
+        return (
+          <div id="main-container">
+            <ReactTable
+              className="-striped -highlight"
+              data={this.state.data}
+              noDataText={this.state.error !== null ? `Something went wrong: ${this.state.error}` : null}
+              columns={columns}
+              loading={this.state.loading}
+              defaultSorted={[{ id: 'number', asc: true }]}
+              pageSizeOptions={[25, 50, 100]}
+              defaultPageSize={50}
+            />
+          </div>
+        );
       }
     }
 
-      ReactDOM.render(
-        <App />,
-        document.getElementById('root')
-      );
+    ReactDOM.render(
+      <RealStars />,
+      document.getElementById('root')
+    );
 
-    </script>
+  </script>
   <!--
       Note: this page is a great way to try React but it's not suitable for production.
       It slowly compiles JSX with Babel in the browser and uses a large development build of React.

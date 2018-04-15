@@ -161,7 +161,7 @@ fs.readdir(REPO_DIR, async (err, filenames) => {
   const list = Object.keys(total).map(lib => Object.assign({}, total[lib], { name: lib }));
   const inLists = list.filter(lib => lib.inList);
 
-  const sortedList = list.sort((a, b) => a.stars > b.stars ? -1 : 1);
+  const sortedList = list.sort((a, b) => a.stars > b.stars ? -1 : 1).map((lib, index) => Object.assign({}, lib, { number: index+1 }));
 
   console.log(sortedList)
   saveToFile({
