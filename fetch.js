@@ -126,14 +126,16 @@ fs.readdir(REPO_DIR, async (err, filenames) => {
     if (total[repo.name] === undefined) {
       total[repo.name] = {
         inList: true,
-        stars: repo.stargazers_count,
+        aggregatedStars: repo.stargazers_count,
+        githubStars: repo.stargazers_count,
         url: repo.html_url,
         owner: repo.owner.login,
       }
     } else {
       total[repo.name] = Object.assign({}, total[repo.name], {
         inList: true,
-        stars: total[repo.name].stars + repo.stargazers_count,
+        aggregatedStars: total[repo.name].aggregatedStars + repo.stargazers_count,
+        githubStars: repo.stargazers_count,
         url: repo.html_url,
         owner: repo.owner.login,
       });
@@ -147,11 +149,11 @@ fs.readdir(REPO_DIR, async (err, filenames) => {
         if (total[library] === undefined) {
           total[library] = {
             inList: false,
-            stars: repo.stargazers_count,
+            aggregatedStars: repo.stargazers_count,
           };
         } else {
           total[library] = Object.assign({}, total[library], {
-            stars: total[library].stars + repo.stargazers_count,
+            aggregatedStars: total[library].aggregatedStars + repo.stargazers_count,
           });
         }
       });
@@ -161,7 +163,9 @@ fs.readdir(REPO_DIR, async (err, filenames) => {
   const list = Object.keys(total).map(lib => Object.assign({}, total[lib], { name: lib }));
   const inLists = list.filter(lib => lib.inList);
 
-  const sortedList = list.sort((a, b) => a.stars > b.stars ? -1 : 1).map((lib, index) => Object.assign({}, lib, { number: index+1 }));
+  const sortedList = list
+    .sort((a, b) => a.aggregatedStars > b.aggregatedStars ? -1 : 1)
+    .map((lib, index) => Object.assign({}, lib, { number: index+1 }));
 
   console.log(sortedList)
   saveToFile({

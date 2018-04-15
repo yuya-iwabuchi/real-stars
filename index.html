@@ -42,6 +42,10 @@
       max-height: 80vh;
     }
 
+    .ReactTable .rt-thead {
+      overflow-y: scroll;
+    }
+
     #main-container > div.ReactTable .rt-th {
       padding: 10px 0;
     }
@@ -80,34 +84,45 @@
           Header: '#',
           accessor: 'number',
           minWidth: 50,
-          style: {
-            textAlign: 'center'
-          }
+          style: { textAlign: 'center' },
         }, {
           Header: 'Name',
           accessor: 'name',
           minWidth: 300,
+          style: { textAlign: 'center' },
         }, {
-          id: 'stars',
-          Header: 'Stars',
-          accessor: 'stars',
+          id: 'aggregatedStars',
+          Header: 'Aggregated Stars',
+          accessor: 'aggregatedStars',
           Cell: row => (<div>{row.value.toLocaleString()}</div>),
-          width: 150,
+          minWidth: 140,
+          style: { textAlign: 'right' },
+        }, {
+          id: 'githubStars',
+          Header: 'Github Stars',
+          accessor: 'githubStars',
+          Cell: row => row.original.inList ? <div>{row.value.toLocaleString()}</div> : null,
+          minWidth: 140,
+          style: { textAlign: 'right' },
         }, {
           id: 'top1000',
           Header: 'In Top 1000',
           accessor: 'inList',
-          Cell: row => (<div>{row.value ? 'Yes' : 'No'}</div>),
+          Cell: row => (<div style={{ textAlign: 'center' }}>{row.value ? 'Yes' : 'No'}</div>),
         }, {
           id: 'link',
           Header: 'Link',
           accessor: 'url',
-          Cell: row => row.original.inList ? <a className='link' href={row.value} target="_blank">Link</a> : null
+          Cell: row => row.original.inList ? <a className='link' href={row.value} target="_blank">Link</a> : null,
+          width: 50,
+          style: { textAlign: 'center' },
         }, {
           id: 'owner',
           Header: 'Owner',
           accessor: 'owner',
-          Cell: row => row.original.inList ? <div>{row.value}</div> : null
+          Cell: row => row.original.inList ? <div>{row.value}</div> : null,
+          minWidth: 150,
+          style: { textAlign: 'center' },
         }]
 
         return (
