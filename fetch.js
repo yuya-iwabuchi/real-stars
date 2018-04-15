@@ -52,6 +52,7 @@ const times = n => f => {
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// FETCH REPOSITORIES
 // times(100)(async (i) => {
 //   const page = i + 1;
 //   try {
@@ -67,7 +68,46 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 //   }
 // });
 
-fs.readdir(REPO_DIR, (err, filenames) => {
+// FETCH PACKAGE.JSON
+// fs.readdir(REPO_DIR, (err, filenames) => {
+//   if (err) {
+//     console.log('Error!', err);
+//     return;
+//   }
+//   filenames.forEach(filename => {
+//     const data = fs.readFileSync(`${REPO_DIR}/${filename}`);
+//     repositories.push(...JSON.parse(data));
+//   })
+
+//   times(repositories.length)(async (index) => {
+//     const repo = repositories[index];
+//     const number = (index + 1).toString().padStart(5, '0');
+//     const packageFilename = `${PACKAGE_DIR}/${repo.owner.login}.${repo.name}.package.json`;
+//     if (!fs.existsSync(packageFilename)) {
+//       await sleep(1000)
+//       await fetch(`${repo.url}/contents/package.json?access_token=${ACCESS_TOKEN}`)
+//         .then(res => {
+//           if (res.ok) return res.json();
+//           throw new Error(`(${res.status}) ${res.statusText}`);
+//         })
+//         .then(res => {
+//           const data = JSON.parse(Buffer.from(res.content, 'base64').toString());
+//           saveToFile({
+//             filename: packageFilename,
+//             data,
+//           });
+//           console.log(`[${number}] package.json found: ${repo.name}`);
+//         })
+//         .catch(err => {
+//           console.log(`[${number}] package.json not found: ${repo.name} - ${err.message}`);
+//         });
+//       } else {
+//         console.log(`[${number}] Skipping: ${repo.name}`);
+//       }
+//     });
+// })
+
+fs.readdir(REPO_DIR, async (err, filenames) => {
   if (err) {
     console.log('Error!', err);
     return;
@@ -75,32 +115,57 @@ fs.readdir(REPO_DIR, (err, filenames) => {
   filenames.forEach(filename => {
     const data = fs.readFileSync(`${REPO_DIR}/${filename}`);
     repositories.push(...JSON.parse(data));
-  })
+  });
 
-  times(repositories.length)(async (index) => {
-    const repo = repositories[index];
+  const total = {};
+
+  repositories.forEach((repo, index) => {
     const number = (index + 1).toString().padStart(5, '0');
     const packageFilename = `${PACKAGE_DIR}/${repo.owner.login}.${repo.name}.package.json`;
-    if (!fs.existsSync(packageFilename)) {
-      await sleep(1000)
-      await fetch(`${repo.url}/contents/package.json?access_token=${ACCESS_TOKEN}`)
-        .then(res => {
-          if (res.ok) return res.json();
-          throw new Error(`(${res.status}) ${res.statusText}`);
-        })
-        .then(res => {
-          const data = JSON.parse(Buffer.from(res.content, 'base64').toString());
-          saveToFile({
-            filename: packageFilename,
-            data,
-          });
-          console.log(`[${number}] package.json found: ${repo.name}`);
-        })
-        .catch(err => {
-          console.log(`[${number}] package.json not found: ${repo.name} - ${err.message}`);
-        });
-      } else {
-        console.log(`[${number}] Skipping: ${repo.name}`);
+
+    if (total[repo.name] === undefined) {
+      total[repo.name] = {
+        inList: true,
+        stars: repo.stargazers_count,
+        url: repo.html_url,
+        owner: repo.owner.login,
       }
-    });
+    } else {
+      total[repo.name] = Object.assign({}, total[repo.name], {
+        inList: true,
+        stars: total[repo.name].stars + repo.stargazers_count,
+        url: repo.html_url,
+        owner: repo.owner.login,
+      });
+    }
+    if (fs.existsSync(packageFilename)) {
+      const data = fs.readFileSync(packageFilename);
+      const packageJson = JSON.parse(data);
+
+      const libraries = Object.assign({}, packageJson.dependencies, packageJson.devDependencies);
+      Object.keys(libraries).forEach(library => {
+        if (total[library] === undefined) {
+          total[library] = {
+            inList: false,
+            stars: repo.stargazers_count,
+          };
+        } else {
+          total[library] = Object.assign({}, total[library], {
+            stars: total[library].stars + repo.stargazers_count,
+          });
+        }
+      });
+    }
+  });
+
+  const list = Object.keys(total).map(lib => Object.assign({}, total[lib], { name: lib }));
+  const inLists = list.filter(lib => lib.inList);
+
+  const sortedList = list.sort((a, b) => a.stars > b.stars ? -1 : 1);
+
+  console.log(sortedList)
+  saveToFile({
+    filename: 'result.json',
+    data: sortedList,
+  });
 })

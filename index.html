@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Real Stars</title>
+  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <script src="https://unpkg.com/react-table@latest/react-table.min.js"></script>
+  <link rel="stylesheet" href="node_modules/react-table/react-table.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.2/gh-fork-ribbon.min.css"></link>
+</head>
+
+<body>
+  <a class="github-fork-ribbon" href="https://github.com/Sunakujira1/real-stars" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+  <div id="root"></div>
+  <script type="text/babel">
+
+    class App extends Rect.Component {
+      constructor() {
+
+        this.state = {
+          data: [],
+          loading: true,
+        };
+      }
+
+      componentWillMount() {
+        fetch('./result.json')
+          .then(res => res.json())
+          .then(data => this.setState({ data, loading: false }));
+      }
+
+      render() {
+        const columns = [{
+          Header: 'Name',
+          accessor: 'name' // String-based value accessors!
+        }, {
+          Header: 'Stars',
+          accessor: 'stars'
+        }, {
+          id: 'top1000', // Required because our accessor is not a string
+          Header: 'In Top 1000',
+          accessor: 'inList',
+        }, {
+          id: 'link', // Required because our accessor is not a string
+          Header: 'Link',
+          Cell: props => props.inList ? <a className='link' href={props.url}>Link</a> : null
+        }]
+
+        <ReactTable
+          data={this.state.data}
+          columns={columns}
+          loading={this.state.loading}
+          defaultSorted={[{ id: 'stars', desc: true }]}
+        />
+      }
+    }
+
+      ReactDOM.render(
+        <App />,
+        document.getElementById('root')
+      );
+
+    </script>
+  <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      To set up a production-ready React build environment, follow these instructions:
+      * https://reactjs.org/docs/add-react-to-a-new-app.html
+      * https://reactjs.org/docs/add-react-to-an-existing-app.html
+
+      You can also use React without JSX, in which case you can remove Babel:
+      * https://reactjs.org/docs/react-without-jsx.html
+      * https://reactjs.org/docs/cdn-links.html
+    -->
+</body>
+
+</html>
