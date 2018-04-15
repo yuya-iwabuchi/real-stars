@@ -1,0 +1,12 @@
+{
+  "name": "real-stars",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Yuya <yuya.iwabuchi@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "node-fetch": "^2.1.2"
+  }
+}
