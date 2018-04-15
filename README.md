@@ -29,4 +29,4 @@ Here are the gist of the algorithm:
 
 
 ### Side note
-There are definitely better ways to approach this, but regardless I wanted to play around with GutHub API and simple data aggregation.
+There are definitely better ways to approach this, but regardless I wanted to play around with GitHub API and simple data aggregation.
