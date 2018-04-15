@@ -19,7 +19,7 @@ Here are the gist of the algorithm:
 3. Aggregate star count by treating sharing star count to `dependencies` and `devDependencies`
 
 ## Problems faced
-- GitHub's search API limits the results to the first 1000 items. [Possible solution using `created_at`](https://stackoverflow.com/a/37639739/5911613)
+- GitHub's search API [limits the results to the first 1000 items](https://developer.github.com/v3/search/#about-the-search-api). [Possible solution using `created_at`](https://stackoverflow.com/a/37639739/5911613)
 
 ### Todo (probably never)
 - [ ] Use `created_at` to fetch more repositories as mentioned above
