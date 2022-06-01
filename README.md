@@ -1,3 +1,5 @@
+2022-06-01 - No longer working.
+
 # real-stars
 Find out the *real* star count of JS repositories
 
